@@ -34,6 +34,11 @@
             "date": 1763978400006,
             "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-16-success.log",
             "hash": "2e3b664e684a1654fcc1a54cfbbfa48a3ad229568a5419f5fb86344f71c05bdc"
+        },
+        {
+            "date": 1763982000014,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-17-success.log",
+            "hash": "bb68985b0fdbf12a2ee58122935866a3a601fa5c9c37ef5a1955c5b909eae553"
         }
     ],
     "hashType": "sha256"
