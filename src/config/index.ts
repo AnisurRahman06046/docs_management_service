@@ -20,6 +20,10 @@ const config = {
     permanentDir: process.env.FILE_PERMANENT_DIR || path.join(process.cwd(), 'uploads', 'permanent'),
     maxFileSize: Number(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB
     maxSizeReadable: process.env.MAX_SIZE_READABLE || '5 MB',
+    // Base URL for file access - frontend uses this + fileUrl to construct browsable URL
+    // Local: http://localhost:3005/api/v1/documents-management/files
+    // Production: https://cdn.example.com/files or https://api.example.com/api/v1/documents-management/files
+    baseUrl: process.env.FILE_BASE_URL || `http://localhost:${process.env.PORT || 3005}/api/v1/documents-management/files`,
   },
   tempCleanup: {
     enabled: process.env.TEMP_CLEANUP_ENABLED !== 'false',

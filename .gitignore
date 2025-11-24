@@ -1,10 +1,33 @@
 node_modules
-# Keep environment variables out of version control
-.env
-.vercel
 dist
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Prisma generated
 /src/generated/prisma
 
-/src/generated/prisma
+# Uploads directory (keep structure, ignore files)
+/uploads/temp/*
+/uploads/permanent/*
+/uploads/quarantine/*
+!uploads/.gitkeep
+!uploads/temp/.gitkeep
+!uploads/permanent/.gitkeep
 
-/src/generated/prisma
+# IDE
+.idea
+.vscode
+
+# Vercel
+.vercel
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

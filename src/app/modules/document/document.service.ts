@@ -9,6 +9,14 @@ type ServiceResult<T> =
   | { success: true; data: T }
   | { success: false; error: { statusCode: number; message: string; errorMessages?: { path: string | number; message: string }[] } };
 
+/**
+ * Helper to clean up temp files when document creation fails
+ */
+const cleanupTempFiles = (documents: { tempPath: string }[]): void => {
+  const tempPaths = documents.map((d) => d.tempPath);
+  UploadService.deleteTempFiles(tempPaths);
+};
+
 const createDocuments = async (payload: CreateDocumentsRequest): Promise<ServiceResult<DocumentResponse[]>> => {
   const { agencyId, userId, userType, createdBy, documents } = payload;
   const createdDocs: DocumentResponse[] = [];
@@ -17,6 +25,8 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
     // Validate all temp files exist
     for (const doc of documents) {
       if (!UploadService.tempFileExists(doc.tempPath)) {
+        // Clean up any other temp files that do exist
+        cleanupTempFiles(documents.filter((d) => d.tempPath !== doc.tempPath));
         return {
           success: false,
           error: {
@@ -35,6 +45,7 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
     const foundTypeIds = new Set(documentTypes.map((dt) => dt.id));
     for (const doc of documents) {
       if (!foundTypeIds.has(doc.documentTypeId)) {
+        cleanupTempFiles(documents);
         return {
           success: false,
           error: {
@@ -53,6 +64,7 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
       if (docType && docType.allowedExtensions.length > 0) {
         const ext = doc.extension.toLowerCase();
         if (!docType.allowedExtensions.includes(ext)) {
+          cleanupTempFiles(documents);
           return {
             success: false,
             error: {
@@ -74,6 +86,7 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
     for (const doc of documents) {
       const existingDoc = await documentRepository.findByUserAndType(userType, userId, doc.documentTypeId);
       if (existingDoc) {
+        cleanupTempFiles(documents);
         const docType = typeMap.get(doc.documentTypeId);
         return {
           success: false,
@@ -140,6 +153,8 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
 
     return { success: true, data: createdDocs };
   } catch (error) {
+    // Clean up temp files on database error
+    cleanupTempFiles(documents);
     return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
   }
 };
@@ -204,6 +219,7 @@ const updateDocument = async (payload: UpdateDocumentPayload): Promise<ServiceRe
     // Find existing document and verify ownership
     const existingDoc = await documentRepository.findByIdAndUser(documentId, agencyId, userId);
     if (!existingDoc) {
+      UploadService.deleteTempFile(tempPath);
       return {
         success: false,
         error: {
@@ -219,6 +235,7 @@ const updateDocument = async (payload: UpdateDocumentPayload): Promise<ServiceRe
     if (documentType && documentType.allowedExtensions.length > 0) {
       const ext = extension.toLowerCase();
       if (!documentType.allowedExtensions.includes(ext)) {
+        UploadService.deleteTempFile(tempPath);
         return {
           success: false,
           error: {
@@ -297,6 +314,8 @@ const updateDocument = async (payload: UpdateDocumentPayload): Promise<ServiceRe
       },
     };
   } catch (error) {
+    // Clean up temp file on database error
+    UploadService.deleteTempFile(tempPath);
     return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
   }
 };
