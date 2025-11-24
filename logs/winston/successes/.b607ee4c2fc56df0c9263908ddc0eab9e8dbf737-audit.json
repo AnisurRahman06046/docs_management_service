@@ -19,6 +19,21 @@
             "date": 1763967600019,
             "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-13-success.log",
             "hash": "cbb85c34e2485c6954c5c4b5d7edaf344d8a331d4720c6627b309e7fa11a0ba3"
+        },
+        {
+            "date": 1763971200010,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-14-success.log",
+            "hash": "43a679eb60923e715655a5ddfb8247ef716c2991eff1b8591f10161eee23f9e4"
+        },
+        {
+            "date": 1763974800009,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-15-success.log",
+            "hash": "19b92df759f00b63b3337c97382d3a5c42a2a0a540849436a3ad362072d4cc08"
+        },
+        {
+            "date": 1763978400006,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-16-success.log",
+            "hash": "2e3b664e684a1654fcc1a54cfbbfa48a3ad229568a5419f5fb86344f71c05bdc"
         }
     ],
     "hashType": "sha256"

@@ -5,6 +5,7 @@ const router = Router();
 
 router.post('/', documentController.createDocuments);
 router.get('/:agencyId/user/:userId', documentController.getUserDocuments);
+router.patch('/:agencyId/user/:userId/:id', documentController.updateDocument);
 router.delete('/:agencyId/user/:userId/:id', documentController.deleteDocument);
 router.get('/:agencyId/:id', documentController.getById);
 

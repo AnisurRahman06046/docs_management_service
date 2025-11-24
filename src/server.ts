@@ -2,6 +2,7 @@
 import app from './app';
 import { pool } from './config/database';
 import { initializeSchedulers } from './schedulers';
+import { virusScanner } from './app/modules/upload/virusScanner.service';
 
 const PORT = process.env.PORT || 3005;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-const
@@ -62,8 +63,11 @@ process.on('SIGINT', () => {
 });
 
 // Start server
-server = app.listen(PORT, () => {
+server = app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+
+  // Initialize virus scanner
+  await virusScanner.initialize();
 
   // Initialize schedulers after server starts
   initializeSchedulers();

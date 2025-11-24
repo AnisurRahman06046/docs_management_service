@@ -25,7 +25,19 @@ const config = {
     enabled: process.env.TEMP_CLEANUP_ENABLED !== 'false',
     cronSchedule: process.env.TEMP_CLEANUP_CRON || '0 * * * *', // Every hour
     maxAgeHours: Number(process.env.TEMP_CLEANUP_MAX_AGE_HOURS) || 24,
-  }
+  },
+  virusScan: {
+    enabled: process.env.VIRUS_SCAN_ENABLED !== 'false',
+    clamdscan: {
+      host: process.env.CLAMAV_HOST || '127.0.0.1',
+      port: Number(process.env.CLAMAV_PORT) || 3310,
+      timeout: Number(process.env.CLAMAV_TIMEOUT) || 60000,
+    },
+    clamscan: {
+      path: process.env.CLAMSCAN_PATH || '/usr/bin/clamscan',
+    },
+    quarantineDir: process.env.QUARANTINE_DIR || path.join(process.cwd(), 'uploads', 'quarantine'),
+  },
 };
 
 export default config;

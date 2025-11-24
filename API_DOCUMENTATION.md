@@ -379,6 +379,7 @@ Manage user documents.
 |--------|----------|-------------|
 | POST | `/documents` | Create documents (finalize upload) |
 | GET | `/documents/:agencyId/user/:userId` | Get user's documents |
+| PATCH | `/documents/:agencyId/user/:userId/:id` | Update/replace a document |
 | DELETE | `/documents/:agencyId/user/:userId/:id` | Delete a document |
 | GET | `/documents/:agencyId/:id` | Get a single document |
 
@@ -454,7 +455,58 @@ Retrieves all documents for a specific user.
 
 ---
 
-### 3.3 Delete Document
+### 3.3 Update Document
+
+**PATCH** `/documents/:agencyId/user/:userId/:id`
+
+Replaces an existing document with a new version. Creates a new version record and updates the document with the new file.
+
+**Path Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| agencyId | string | Yes | Agency identifier |
+| userId | string | Yes | User identifier (ownership verification) |
+| id | string | Yes | Document ID |
+
+**Request Body:**
+```json
+{
+  "tempPath": "temp/abc123_newfile.pdf (required)",
+  "originalName": "updated-document.pdf (required)",
+  "size": 204800,
+  "extension": "pdf",
+  "updatedBy": "user-id (required)"
+}
+```
+
+**Response:**
+```json
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Document updated successfully",
+  "data": {
+    "id": "uuid",
+    "documentTypeId": "uuid",
+    "fileUrl": "permanent/agency/STUDENT/user/docType/v2_timestamp_file.pdf",
+    "fileSize": 204800,
+    "fileExtension": "pdf",
+    "status": "DRAFT",
+    "versionNumber": 2,
+    "updatedAt": "datetime"
+  }
+}
+```
+
+**Notes:**
+- File extension must match one of the allowed extensions for the document type
+- A new version is created, preserving the previous version history
+- The previous file is preserved for version history
+- An audit log entry is created for the update
+
+---
+
+### 3.4 Delete Document
 
 **DELETE** `/documents/:agencyId/user/:userId/:id`
 
@@ -481,7 +533,7 @@ Soft deletes a document (sets `deletedAt` timestamp) and removes the file from s
 
 ---
 
-### 3.4 Get Document by ID
+### 3.5 Get Document by ID
 
 **GET** `/documents/:agencyId/:id`
 
@@ -544,6 +596,34 @@ Uploads single or multiple files to temporary storage.
     { "tempPath": "...", "filename": "...", ... },
     { "tempPath": "...", "filename": "...", ... }
   ]
+}
+```
+
+**Virus Scanning:**
+Files are automatically scanned for malware using ClamAV before being stored. If a file is detected as infected:
+
+```json
+{
+  "statusCode": 400,
+  "success": false,
+  "message": "File(s) rejected due to security scan",
+  "data": {
+    "rejectedFiles": ["infected-file.pdf"],
+    "reason": "Potential malware detected or scan failed"
+  }
+}
+```
+
+If some files pass and others fail:
+```json
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "2 file(s) uploaded, 1 rejected",
+  "data": {
+    "uploaded": [...],
+    "rejected": ["infected-file.pdf"]
+  }
 }
 ```
 

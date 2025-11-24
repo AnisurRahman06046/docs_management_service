@@ -1,0 +1,22 @@
+Mon Nov 24 2025 16:0:0 } [DOER] info: Running temp file cleanup...
+Mon Nov 24 2025 16:0:0 } [DOER] info: Temp cleanup completed:
+Mon Nov 24 2025 16:18:42 } [DOER] info: Initializing schedulers...
+Mon Nov 24 2025 16:18:42 } [DOER] info: Starting temp cleanup scheduler with schedule: 0 * * * *
+Mon Nov 24 2025 16:18:42 } [DOER] info: Max age for temp files: 24 hours
+Mon Nov 24 2025 16:18:42 } [DOER] info: All schedulers initialized
+Mon Nov 24 2025 16:18:57 } [DOER] info: Initializing schedulers...
+Mon Nov 24 2025 16:18:57 } [DOER] info: Starting temp cleanup scheduler with schedule: 0 * * * *
+Mon Nov 24 2025 16:18:57 } [DOER] info: Max age for temp files: 24 hours
+Mon Nov 24 2025 16:18:57 } [DOER] info: All schedulers initialized
+Mon Nov 24 2025 16:20:7 } [DOER] info: Initializing schedulers...
+Mon Nov 24 2025 16:20:7 } [DOER] info: Starting temp cleanup scheduler with schedule: 0 * * * *
+Mon Nov 24 2025 16:20:7 } [DOER] info: Max age for temp files: 24 hours
+Mon Nov 24 2025 16:20:7 } [DOER] info: All schedulers initialized
+Mon Nov 24 2025 16:22:40 } [DOER] info: Initializing schedulers...
+Mon Nov 24 2025 16:22:40 } [DOER] info: Starting temp cleanup scheduler with schedule: 0 * * * *
+Mon Nov 24 2025 16:22:40 } [DOER] info: Max age for temp files: 24 hours
+Mon Nov 24 2025 16:22:40 } [DOER] info: All schedulers initialized
+Mon Nov 24 2025 16:25:50 } [DOER] info: Initializing schedulers...
+Mon Nov 24 2025 16:25:50 } [DOER] info: Starting temp cleanup scheduler with schedule: 0 * * * *
+Mon Nov 24 2025 16:25:50 } [DOER] info: Max age for temp files: 24 hours
+Mon Nov 24 2025 16:25:50 } [DOER] info: All schedulers initialized

@@ -19,6 +19,11 @@
             "date": 1763967759456,
             "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/doer-2025-24-11-13-error.log",
             "hash": "261f09cb623cb198608c2d5d0ca3840c42baa309fa6bb02e18e7bb76724ef338"
+        },
+        {
+            "date": 1763979522856,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/doer-2025-24-11-16-error.log",
+            "hash": "0a74ff0597adeb2069041eae63700fa4190fb0bbdbe6fbf8d06150362172ef50"
         }
     ],
     "hashType": "sha256"

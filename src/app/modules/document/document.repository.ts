@@ -139,4 +139,64 @@ export const documentRepository = {
       },
     });
   },
+
+  updateWithNewVersion: async (data: {
+    documentId: string;
+    document: {
+      versionNumber: number;
+      fileUrl: string;
+      fileSize: number;
+      fileExtension: string;
+      updatedBy: string;
+    };
+    version: {
+      versionNumber: number;
+      fileUrl: string;
+      fileSize: number;
+      fileExtension: string;
+      uploadedBy: string;
+    };
+    auditLog: {
+      action: string;
+      performedBy: string;
+      metadata?: object;
+    };
+  }) => {
+    return prisma.$transaction(async (tx) => {
+      // Create new version
+      const version = await tx.documentVersion.create({
+        data: {
+          documentId: data.documentId,
+          ...data.version,
+          createdBy: data.document.updatedBy,
+        },
+      });
+
+      // Update document with new version info
+      const updatedDocument = await tx.document.update({
+        where: { id: data.documentId },
+        data: {
+          versionNumber: data.document.versionNumber,
+          fileUrl: data.document.fileUrl,
+          fileSize: data.document.fileSize,
+          fileExtension: data.document.fileExtension,
+          currentVersionId: version.id,
+          updatedBy: data.document.updatedBy,
+          updatedAt: new Date(),
+        },
+      });
+
+      // Create audit log
+      await tx.documentAuditLog.create({
+        data: {
+          documentId: data.documentId,
+          documentVersionId: version.id,
+          ...data.auditLog,
+          createdBy: data.document.updatedBy,
+        },
+      });
+
+      return { ...updatedDocument, currentVersion: version };
+    });
+  },
 };

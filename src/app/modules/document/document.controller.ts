@@ -77,6 +77,48 @@ const getById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+interface UpdateDocumentBody {
+  tempPath: string;
+  originalName: string;
+  size: number;
+  extension: string;
+}
+
+const updateDocument = catchAsync(async (req: Request, res: Response) => {
+  const { agencyId, userId, id } = req.params;
+  const { tempPath, originalName, size, extension } = req.body as UpdateDocumentBody;
+
+  if (!agencyId || !userId || !id) {
+    return sendResponse(res, { statusCode: 400, success: false, message: 'agencyId, userId and id are required' });
+  }
+
+  if (!tempPath || !originalName || !size || !extension) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'tempPath, originalName, size, and extension are required',
+    });
+  }
+
+  const result = await documentService.updateDocument({
+    agencyId,
+    userId,
+    documentId: id,
+    tempPath,
+    originalName,
+    size,
+    extension,
+    updatedBy: userId,
+  });
+
+  return sendResponse(res, {
+    statusCode: result.success ? 200 : result.error?.statusCode || 400,
+    success: result.success,
+    message: result.success ? 'Document updated successfully' : result.error?.message,
+    data: result.success ? result.data : null,
+  });
+});
+
 const deleteDocument = catchAsync(async (req: Request, res: Response) => {
   const { agencyId, userId, id } = req.params;
 
@@ -98,5 +140,6 @@ export const documentController = {
   createDocuments,
   getUserDocuments,
   getById,
+  updateDocument,
   deleteDocument,
 };

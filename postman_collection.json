@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "document-management-service",
+    "name": "Document Management Service",
+    "description": "API collection for Document Management Service - A robust microservice for managing document categories, types, file uploads, and user documents with multi-tenancy support.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3005/api/v1/documents-management",
+      "type": "string"
+    },
+    {
+      "key": "agencyId",
+      "value": "agency-001",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user-001",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "documentTypeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Document Categories",
+      "description": "APIs for managing document categories",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agencyId\": \"{{agencyId}}\",\n  \"name\": \"Identity Documents\",\n  \"description\": \"Government-issued identity documents\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents-category",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category"]
+            },
+            "description": "Create a new document category for an agency"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents-category/{{agencyId}}?page=1&limit=10&sortBy=createdAt&sortOrder=desc&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category", "{{agencyId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Get all categories for an agency with pagination and search"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents-category/{{agencyId}}/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category", "{{agencyId}}", "{{categoryId}}"]
+            },
+            "description": "Get a single category by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents-category/{{agencyId}}/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category", "{{agencyId}}", "{{categoryId}}"]
+            },
+            "description": "Update an existing category"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents-category/{{agencyId}}/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category", "{{agencyId}}", "{{categoryId}}"]
+            },
+            "description": "Soft delete a category"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Document Types",
+      "description": "APIs for managing document type requirements",
+      "item": [
+        {
+          "name": "Create Document Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Passport\",\n  \"description\": \"Valid passport document\",\n  \"isRequired\": true,\n  \"allowedExtensions\": [\"pdf\", \"jpg\", \"png\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{categoryId}}"]
+            },
+            "description": "Create a new document type requirement within a category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Types by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{categoryId}}/list?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{categoryId}}", "list"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get all document types in a category with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Types Grouped by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/grouped",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "grouped"]
+            },
+            "description": "Get all document types grouped by their categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Type by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{documentTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{documentTypeId}}"]
+            },
+            "description": "Get a single document type by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document Type",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Document Type\",\n  \"description\": \"Updated description\",\n  \"isRequired\": false,\n  \"allowedExtensions\": [\"pdf\", \"jpg\", \"png\", \"jpeg\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{documentTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{documentTypeId}}"]
+            },
+            "description": "Update an existing document type"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document Type",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{documentTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{documentTypeId}}"]
+            },
+            "description": "Soft delete a document type"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "File Upload",
+      "description": "APIs for handling file uploads",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select a file to upload"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload"]
+            },
+            "description": "Upload a single file to temporary storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select first file"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select second file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload"]
+            },
+            "description": "Upload multiple files to temporary storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Temp Files",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tempPaths\": [\n    \"temp/abc123_filename.pdf\",\n    \"temp/def456_another.jpg\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload/temp",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload", "temp"]
+            },
+            "description": "Delete files from temporary storage"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "description": "APIs for managing user documents",
+      "item": [
+        {
+          "name": "Create Documents (Finalize Upload)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agencyId\": \"{{agencyId}}\",\n  \"userId\": \"{{userId}}\",\n  \"userType\": \"STUDENT\",\n  \"createdBy\": \"{{userId}}\",\n  \"documents\": [\n    {\n      \"documentTypeId\": \"{{documentTypeId}}\",\n      \"tempPath\": \"temp/abc123_passport.pdf\",\n      \"originalName\": \"my-passport.pdf\",\n      \"size\": 102400,\n      \"extension\": \"pdf\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents"]
+            },
+            "description": "Finalize file upload by moving files from temp to permanent storage and creating database records. userType can be: STUDENT, COUNSELOR, ADMIN, OTHER"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{agencyId}}/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{agencyId}}", "user", "{{userId}}"]
+            },
+            "description": "Get all documents for a specific user within an agency"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{agencyId}}/{{documentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{agencyId}}", "{{documentId}}"]
+            },
+            "description": "Get a single document by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document (New Version)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tempPath\": \"temp/abc123_newfile.pdf\",\n  \"originalName\": \"updated-passport.pdf\",\n  \"size\": 204800,\n  \"extension\": \"pdf\",\n  \"updatedBy\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{agencyId}}/user/{{userId}}/{{documentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{agencyId}}", "user", "{{userId}}", "{{documentId}}"]
+            },
+            "description": "Replace an existing document with a new version. Upload the new file first, then use the tempPath here. Creates a new version record preserving history."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{agencyId}}/user/{{userId}}/{{documentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{agencyId}}", "user", "{{userId}}", "{{documentId}}"]
+            },
+            "description": "Soft delete a document and remove the file from storage. Verifies the document belongs to the specified user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workflow Examples",
+      "description": "Example workflows for common use cases",
+      "item": [
+        {
+          "name": "1. Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agencyId\": \"{{agencyId}}\",\n  \"name\": \"Identity Documents\",\n  \"description\": \"Government-issued identity documents\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents-category",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents-category"]
+            },
+            "description": "Step 1: Create a document category"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Create Document Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Passport\",\n  \"description\": \"Valid passport document\",\n  \"isRequired\": true,\n  \"allowedExtensions\": [\"pdf\", \"jpg\", \"png\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/document-type/{{agencyId}}/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["document-type", "{{agencyId}}", "{{categoryId}}"]
+            },
+            "description": "Step 2: Create a document type within the category (set categoryId from step 1)"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Upload File to Temp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select your passport file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload"]
+            },
+            "description": "Step 3: Upload file to temporary storage (note the tempPath in response)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Finalize Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agencyId\": \"{{agencyId}}\",\n  \"userId\": \"{{userId}}\",\n  \"userType\": \"STUDENT\",\n  \"createdBy\": \"{{userId}}\",\n  \"documents\": [\n    {\n      \"documentTypeId\": \"{{documentTypeId}}\",\n      \"tempPath\": \"temp/YOUR_TEMP_PATH_HERE\",\n      \"originalName\": \"passport.pdf\",\n      \"size\": 102400,\n      \"extension\": \"pdf\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents"]
+            },
+            "description": "Step 4: Finalize the upload (replace tempPath with value from step 3, set documentTypeId from step 2)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. View User Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{agencyId}}/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{agencyId}}", "user", "{{userId}}"]
+            },
+            "description": "Step 5: View all documents for the user"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -174,6 +174,133 @@ const getById = async (agencyId: string, id: string): Promise<ServiceResult<unkn
   }
 };
 
+interface UpdateDocumentPayload {
+  agencyId: string;
+  userId: string;
+  documentId: string;
+  tempPath: string;
+  originalName: string;
+  size: number;
+  extension: string;
+  updatedBy: string;
+}
+
+const updateDocument = async (payload: UpdateDocumentPayload): Promise<ServiceResult<DocumentResponse>> => {
+  const { agencyId, userId, documentId, tempPath, originalName, size, extension, updatedBy } = payload;
+
+  try {
+    // Validate temp file exists
+    if (!UploadService.tempFileExists(tempPath)) {
+      return {
+        success: false,
+        error: {
+          statusCode: 400,
+          message: 'Temp file not found',
+          errorMessages: [{ path: tempPath, message: 'File does not exist in temp storage' }],
+        },
+      };
+    }
+
+    // Find existing document and verify ownership
+    const existingDoc = await documentRepository.findByIdAndUser(documentId, agencyId, userId);
+    if (!existingDoc) {
+      return {
+        success: false,
+        error: {
+          statusCode: 404,
+          message: 'Document not found',
+          errorMessages: [{ path: documentId, message: 'Document does not exist or does not belong to this user' }],
+        },
+      };
+    }
+
+    // Get document type and validate extension
+    const documentType = await documentTypeRepository.findById(existingDoc.documentTypeId, agencyId);
+    if (documentType && documentType.allowedExtensions.length > 0) {
+      const ext = extension.toLowerCase();
+      if (!documentType.allowedExtensions.includes(ext)) {
+        return {
+          success: false,
+          error: {
+            statusCode: 400,
+            message: 'Invalid file extension',
+            errorMessages: [
+              {
+                path: originalName,
+                message: `Extension '${ext}' is not allowed for ${documentType.name}. Allowed: ${documentType.allowedExtensions.join(', ')}`,
+              },
+            ],
+          },
+        };
+      }
+    }
+
+    // Calculate new version number
+    const newVersionNumber = existingDoc.versionNumber + 1;
+
+    // Generate new permanent path
+    const permanentPath = FileManagerService.getRelativePermanentPath({
+      agencyId,
+      userType: existingDoc.userType,
+      userId,
+      documentTypeId: existingDoc.documentTypeId,
+      versionNumber: newVersionNumber,
+      filename: originalName,
+    });
+
+    // Update document with new version
+    const updatedDoc = await documentRepository.updateWithNewVersion({
+      documentId,
+      document: {
+        versionNumber: newVersionNumber,
+        fileUrl: permanentPath,
+        fileSize: size,
+        fileExtension: extension,
+        updatedBy,
+      },
+      version: {
+        versionNumber: newVersionNumber,
+        fileUrl: permanentPath,
+        fileSize: size,
+        fileExtension: extension,
+        uploadedBy: updatedBy,
+      },
+      auditLog: {
+        action: 'UPDATED',
+        performedBy: updatedBy,
+        metadata: {
+          originalName,
+          tempPath,
+          previousVersion: existingDoc.versionNumber,
+          previousFileUrl: existingDoc.fileUrl,
+        },
+      },
+    });
+
+    // Move new file to permanent storage
+    FileManagerService.moveToPermament(tempPath, permanentPath);
+
+    // Optionally delete old file (keep for version history)
+    // FileManagerService.deletePermanentFile(existingDoc.fileUrl);
+
+    return {
+      success: true,
+      data: {
+        id: updatedDoc.id,
+        documentTypeId: updatedDoc.documentTypeId,
+        fileUrl: updatedDoc.fileUrl,
+        fileSize: updatedDoc.fileSize,
+        fileExtension: updatedDoc.fileExtension,
+        status: updatedDoc.status,
+        versionNumber: updatedDoc.versionNumber,
+        createdAt: updatedDoc.createdAt,
+      },
+    };
+  } catch (error) {
+    return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
+  }
+};
+
 const deleteDocument = async (agencyId: string, userId: string, id: string): Promise<ServiceResult<{ deleted: boolean }>> => {
   try {
     // Find the document and verify ownership
@@ -214,5 +341,6 @@ export const documentService = {
   createDocuments,
   getUserDocuments,
   getById,
+  updateDocument,
   deleteDocument,
 };
