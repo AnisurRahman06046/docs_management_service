@@ -1,0 +1,206 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum DocumentStatus {
+  DRAFT
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum UserType {
+  STUDENT
+  COUNSELOR
+  ADMIN
+  OTHER
+}
+
+model DocumentCategory {
+  id            String                    @id @default(uuid())
+  agencyId      String
+  name          String
+  description   String?
+  
+  // Standard columns
+  createdAt     DateTime                  @default(now())
+  createdBy     String?
+  updatedAt     DateTime?                 @updatedAt
+  updatedBy     String?
+  deletedAt     DateTime?
+  deletedBy     String?
+
+  documentTypes DocumentTypeRequirements[]
+
+  @@index([agencyId, name])
+}
+
+model DocumentTypeRequirements {
+  id                String             @id @default(uuid())
+  agencyId          String
+  categoryId        String
+  name              String
+  description       String?
+  isRequired        Boolean            @default(false)
+  allowedExtensions String[]
+
+  // Standard columns
+  createdAt         DateTime           @default(now())
+  createdBy         String?
+  updatedAt         DateTime?          @updatedAt
+  updatedBy         String?
+  deletedAt         DateTime?
+  deletedBy         String?
+
+  category  DocumentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@index([agencyId, categoryId, name])
+}
+
+model Document {
+  id               String             @id @default(uuid())
+  agencyId         String
+  documentTypeId   String
+  userType         UserType
+  userId           String
+  currentVersionId String?            @unique
+  status           DocumentStatus
+  versionNumber    Int
+  fileUrl          String
+  fileSize         Int
+  fileExtension    String
+  ocrText          String?            @db.Text
+
+  // Standard columns
+  createdAt        DateTime           @default(now())
+  createdBy        String?
+  updatedAt        DateTime?          @updatedAt
+  updatedBy        String?
+  deletedAt        DateTime?
+  deletedBy        String?
+
+  documentType   DocumentTypeRequirements @relation(fields: [documentTypeId], references: [id], onDelete: Restrict)
+  currentVersion DocumentVersion?         @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       DocumentVersion[]        @relation("DocumentVersions")
+  verifications  DocumentVerification[]
+  auditLogs      DocumentAuditLog[]
+  statusTimeline DocumentStatusTimeline[]
+
+  @@index([agencyId, documentTypeId, userType, userId])
+  @@index([agencyId, status])
+  @@index([createdBy])
+  @@unique([userType, userId, documentTypeId])
+}
+
+model DocumentVersion {
+  id             String            @id @default(uuid())
+  documentId     String
+  versionNumber  Int
+  fileUrl        String
+  fileSize       Int
+  fileExtension  String
+  ocrText        String?           @db.Text
+  uploadedBy     String
+
+  // Standard columns
+  uploadedAt     DateTime          @default(now())
+  createdAt      DateTime          @default(now())
+  createdBy      String?
+  updatedAt      DateTime?         @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+
+  document       Document           @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  currentFor     Document?          @relation("CurrentVersion")
+  verifications  DocumentVerification[]
+  auditLogs      DocumentAuditLog[]
+
+  @@index([documentId, versionNumber])
+  @@index([uploadedBy])
+  @@unique([documentId, versionNumber])
+}
+
+model DocumentVerification {
+  id                String             @id @default(uuid())
+  documentId        String
+  documentVersionId String
+  reviewedBy        String
+  status            DocumentStatus
+  remarks           String?            @db.Text
+
+  // Standard columns
+  reviewedAt        DateTime           @default(now())
+  createdAt         DateTime           @default(now())
+  createdBy         String?
+  updatedAt         DateTime?          @updatedAt
+  updatedBy         String?
+  deletedAt         DateTime?
+  deletedBy         String?
+
+  document          Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version           DocumentVersion    @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, documentVersionId])
+  @@index([reviewedBy])
+  @@index([status])
+}
+
+model DocumentAuditLog {
+  id                String            @id @default(uuid())
+  documentId        String
+  documentVersionId String?
+  action            String            // UPLOADED, VERIFIED, REJECTED, DELETED
+  performedBy       String
+  metadata          Json?
+
+  // Standard columns
+  performedAt       DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+  createdBy         String?
+  updatedAt         DateTime?         @updatedAt
+  updatedBy         String?
+  deletedAt         DateTime?
+  deletedBy         String?
+
+  document          Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version           DocumentVersion?  @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, performedAt])
+  @@index([documentVersionId])
+  @@index([performedBy])
+  @@index([action])
+}
+
+model DocumentStatusTimeline {
+  id          String            @id @default(uuid())
+  documentId  String
+  status      DocumentStatus
+  changedBy   String
+
+  // Standard columns
+  changedAt   DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  createdBy   String?
+  updatedAt   DateTime?         @updatedAt
+  updatedBy   String?
+  deletedAt   DateTime?
+  deletedBy   String?
+
+  document    Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, changedAt])
+  @@index([status])
+}

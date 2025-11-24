@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/.f8070d800986d9dd9a97446445569cce0f8e68ea-audit.json",
+    "files": [
+        {
+            "date": 1763962286447,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/doer-2025-24-11-11-error.log",
+            "hash": "9d5ac37c8ec892b7a5a6da2c9f243ccd264552625499bacffc40ba6d2a05dec5"
+        },
+        {
+            "date": 1763965324641,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/doer-2025-24-11-12-error.log",
+            "hash": "851cb7d7d8d85b0a6631ea364456070cb6e31b820837cad0c948185d206b6c6a"
+        },
+        {
+            "date": 1763967759456,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/errors/doer-2025-24-11-13-error.log",
+            "hash": "261f09cb623cb198608c2d5d0ca3840c42baa309fa6bb02e18e7bb76724ef338"
+        }
+    ],
+    "hashType": "sha256"
+}

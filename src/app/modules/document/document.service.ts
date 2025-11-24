@@ -1,0 +1,218 @@
+import handlePostgresError from '../../../errors/handlePostgresError';
+import { UploadService } from '../upload/upload.service';
+import { FileManagerService } from '../upload/fileManager.service';
+import { documentTypeRepository } from '../document-type/documentType.repository';
+import { documentRepository } from './document.repository';
+import { CreateDocumentsRequest, DocumentResponse, UserType } from './document.interface';
+
+type ServiceResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: { statusCode: number; message: string; errorMessages?: { path: string | number; message: string }[] } };
+
+const createDocuments = async (payload: CreateDocumentsRequest): Promise<ServiceResult<DocumentResponse[]>> => {
+  const { agencyId, userId, userType, createdBy, documents } = payload;
+  const createdDocs: DocumentResponse[] = [];
+
+  try {
+    // Validate all temp files exist
+    for (const doc of documents) {
+      if (!UploadService.tempFileExists(doc.tempPath)) {
+        return {
+          success: false,
+          error: {
+            statusCode: 400,
+            message: 'Temp file not found',
+            errorMessages: [{ path: doc.tempPath, message: 'File does not exist in temp storage' }],
+          },
+        };
+      }
+    }
+
+    // Get all document types and validate
+    const documentTypeIds = documents.map((d) => d.documentTypeId);
+    const documentTypes = await documentTypeRepository.findByIds(documentTypeIds, agencyId);
+
+    const foundTypeIds = new Set(documentTypes.map((dt) => dt.id));
+    for (const doc of documents) {
+      if (!foundTypeIds.has(doc.documentTypeId)) {
+        return {
+          success: false,
+          error: {
+            statusCode: 404,
+            message: 'Document type not found',
+            errorMessages: [{ path: doc.documentTypeId, message: 'Document type does not exist for this agency' }],
+          },
+        };
+      }
+    }
+
+    // Validate file extensions
+    const typeMap = new Map(documentTypes.map((dt) => [dt.id, dt]));
+    for (const doc of documents) {
+      const docType = typeMap.get(doc.documentTypeId);
+      if (docType && docType.allowedExtensions.length > 0) {
+        const ext = doc.extension.toLowerCase();
+        if (!docType.allowedExtensions.includes(ext)) {
+          return {
+            success: false,
+            error: {
+              statusCode: 400,
+              message: 'Invalid file extension',
+              errorMessages: [
+                {
+                  path: doc.originalName,
+                  message: `Extension '${ext}' is not allowed for ${docType.name}. Allowed: ${docType.allowedExtensions.join(', ')}`,
+                },
+              ],
+            },
+          };
+        }
+      }
+    }
+
+    // Check for duplicate documents
+    for (const doc of documents) {
+      const existingDoc = await documentRepository.findByUserAndType(userType, userId, doc.documentTypeId);
+      if (existingDoc) {
+        const docType = typeMap.get(doc.documentTypeId);
+        return {
+          success: false,
+          error: {
+            statusCode: 409,
+            message: 'Document already exists',
+            errorMessages: [{ path: doc.documentTypeId, message: `A ${docType?.name || 'document'} already exists for this user` }],
+          },
+        };
+      }
+    }
+
+    // Create documents
+    for (const doc of documents) {
+      const permanentPath = FileManagerService.getRelativePermanentPath({
+        agencyId,
+        userType,
+        userId,
+        documentTypeId: doc.documentTypeId,
+        versionNumber: 1,
+        filename: doc.originalName,
+      });
+
+      const createdDoc = await documentRepository.createWithRelations({
+        document: {
+          agencyId,
+          documentTypeId: doc.documentTypeId,
+          userType: userType as UserType,
+          userId,
+          status: 'DRAFT',
+          versionNumber: 1,
+          fileUrl: permanentPath,
+          fileSize: doc.size,
+          fileExtension: doc.extension,
+          createdBy,
+        },
+        version: {
+          versionNumber: 1,
+          fileUrl: permanentPath,
+          fileSize: doc.size,
+          fileExtension: doc.extension,
+          uploadedBy: createdBy,
+        },
+        auditLog: {
+          action: 'UPLOADED',
+          performedBy: createdBy,
+          metadata: { originalName: doc.originalName, tempPath: doc.tempPath },
+        },
+      });
+
+      FileManagerService.moveToPermament(doc.tempPath, permanentPath);
+
+      createdDocs.push({
+        id: createdDoc.id,
+        documentTypeId: createdDoc.documentTypeId,
+        fileUrl: createdDoc.fileUrl,
+        fileSize: createdDoc.fileSize,
+        fileExtension: createdDoc.fileExtension,
+        status: createdDoc.status,
+        versionNumber: createdDoc.versionNumber,
+        createdAt: createdDoc.createdAt,
+      });
+    }
+
+    return { success: true, data: createdDocs };
+  } catch (error) {
+    return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
+  }
+};
+
+const getUserDocuments = async (agencyId: string, userId: string): Promise<ServiceResult<unknown>> => {
+  try {
+    const documents = await documentRepository.findByUser(agencyId, userId);
+    return { success: true, data: documents };
+  } catch (error) {
+    return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
+  }
+};
+
+const getById = async (agencyId: string, id: string): Promise<ServiceResult<unknown>> => {
+  try {
+    const document = await documentRepository.findById(id, agencyId);
+
+    if (!document) {
+      return {
+        success: false,
+        error: {
+          statusCode: 404,
+          message: 'Document not found',
+          errorMessages: [{ path: 'id', message: 'Document does not exist' }],
+        },
+      };
+    }
+
+    return { success: true, data: document };
+  } catch (error) {
+    return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
+  }
+};
+
+const deleteDocument = async (agencyId: string, userId: string, id: string): Promise<ServiceResult<{ deleted: boolean }>> => {
+  try {
+    // Find the document and verify ownership
+    const document = await documentRepository.findByIdAndUser(id, agencyId, userId);
+
+    if (!document) {
+      return {
+        success: false,
+        error: {
+          statusCode: 404,
+          message: 'Document not found',
+          errorMessages: [{ path: 'id', message: 'Document does not exist or does not belong to this user' }],
+        },
+      };
+    }
+
+    // Delete the file from storage
+    FileManagerService.deletePermanentFile(document.fileUrl);
+
+    // Soft delete - keeps record in database with deletedAt timestamp
+    await documentRepository.softDelete(id, userId);
+
+    // Add audit log for deletion
+    await documentRepository.addAuditLog({
+      documentId: id,
+      action: 'DELETED',
+      performedBy: userId,
+      metadata: { fileUrl: document.fileUrl, deletedAt: new Date().toISOString() },
+    });
+
+    return { success: true, data: { deleted: true } };
+  } catch (error) {
+    return { success: false, error: handlePostgresError(error as import('pg').DatabaseError) };
+  }
+};
+
+export const documentService = {
+  createDocuments,
+  getUserDocuments,
+  getById,
+  deleteDocument,
+};

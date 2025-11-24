@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/.b607ee4c2fc56df0c9263908ddc0eab9e8dbf737-audit.json",
+    "files": [
+        {
+            "date": 1763962286445,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-11-success.log",
+            "hash": "3caa590c9836484bc9169b7b7e18da37f03394c526b5bd77749cfc80c2260d94"
+        },
+        {
+            "date": 1763964000008,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-12-success.log",
+            "hash": "b8f0dd14d6bf13d9696601af1ec9526a391faa2d0bf543dd77f0c8cb32551cd9"
+        },
+        {
+            "date": 1763967600019,
+            "name": "/home/anis/code/DOER/document_management_service (Copy)/logs/winston/successes/doer-2025-24-11-13-success.log",
+            "hash": "cbb85c34e2485c6954c5c4b5d7edaf344d8a331d4720c6627b309e7fa11a0ba3"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,0 +1,20 @@
+
+{
+  "recommendations": [
+    "gamunu.vscode-yarn",
+    "dbaeumer.vscode-eslint", 
+    "esbenp.prettier-vscode", 
+    "eamodio.gitlens", 
+    "christian-kohler.npm-intellisense", 
+    "jasonnutter.search-node-modules", 
+    "usernamehw.errorlens", 
+    "aaron-bond.better-comments", 
+    "streetsidesoftware.code-spell-checker", 
+    "editorconfig.editorconfig", 
+    "chakrounanas.turbo-console-log", 
+    "yzhang.markdown-all-in-one", 
+    "davidanson.vscode-markdownlint", 
+    "ms-ossdata.vscode-postgresql", 
+    "microsoft.vscode-docker" 
+  ]
+}
