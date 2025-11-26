@@ -3,12 +3,12 @@ import path from 'path';
 import fs from 'fs';
 import config from '../../../config';
 
-interface ScanResult {
+type ScanResult = {
   isClean: boolean;
   isInfected: boolean;
   viruses: string[];
   error?: string;
-}
+};
 
 class VirusScannerService {
   private clamscan: NodeClam | null = null;
@@ -19,8 +19,9 @@ class VirusScannerService {
     if (this.initialized) return;
 
     try {
-      // Ensure quarantine directory exists
-      const quarantineDir = config.virusScan?.quarantineDir || path.join(process.cwd(), 'uploads', 'quarantine');
+      const quarantineDir =
+        config.virusScan?.quarantineDir ||
+        path.join(process.cwd(), 'uploads', 'quarantine');
       if (!fs.existsSync(quarantineDir)) {
         fs.mkdirSync(quarantineDir, { recursive: true });
       }
@@ -28,13 +29,13 @@ class VirusScannerService {
       this.clamscan = await new NodeClam().init({
         removeInfected: false,
         quarantineInfected: quarantineDir,
-        scanLog: null,
+        scanLog: undefined,
         debugMode: false,
-        fileList: null,
+        fileList: undefined,
         scanRecursively: false,
         clamscan: {
           path: config.virusScan?.clamscan?.path || '/usr/bin/clamscan',
-          db: null,
+          db: undefined,
           scanArchives: true,
           active: true,
         },
@@ -45,7 +46,7 @@ class VirusScannerService {
           timeout: config.virusScan?.clamdscan?.timeout || 60000,
           localFallback: true,
           path: '/usr/bin/clamdscan',
-          configFile: null,
+          configFile: undefined,
           multiscan: true,
           reloadDb: false,
           active: true,
@@ -57,14 +58,16 @@ class VirusScannerService {
       this.initialized = true;
       console.log('Virus scanner initialized successfully');
     } catch (error) {
-      this.initError = error instanceof Error ? error.message : 'Unknown error initializing virus scanner';
+      this.initError =
+        error instanceof Error
+          ? error.message
+          : 'Unknown error initializing virus scanner';
       console.warn('Virus scanner initialization failed:', this.initError);
       console.warn('File uploads will proceed without virus scanning');
     }
   }
 
   async scanFile(filePath: string): Promise<ScanResult> {
-    // If virus scanning is disabled in config
     if (config.virusScan?.enabled === false) {
       return {
         isClean: true,
@@ -73,7 +76,6 @@ class VirusScannerService {
       };
     }
 
-    // If scanner failed to initialize, allow upload but log warning
     if (!this.initialized || !this.clamscan) {
       console.warn('Virus scanner not available, skipping scan for:', filePath);
       return {
@@ -85,7 +87,9 @@ class VirusScannerService {
     }
 
     try {
-      const fullPath = path.isAbsolute(filePath) ? filePath : path.join(config.file.uploadDir, filePath);
+      const fullPath = path.isAbsolute(filePath)
+        ? filePath
+        : path.join(config.file.uploadDir, filePath);
 
       if (!fs.existsSync(fullPath)) {
         return {
@@ -105,10 +109,6 @@ class VirusScannerService {
       };
     } catch (error) {
       console.error('Virus scan error:', error);
-      // On scan error, we can either:
-      // 1. Reject the file (safer)
-      // 2. Allow the file but log the error (more permissive)
-      // Here we're being safer - rejecting on error
       return {
         isClean: false,
         isInfected: false,
@@ -118,13 +118,13 @@ class VirusScannerService {
     }
   }
 
-  async scanMultipleFiles(filePaths: string[]): Promise<Map<string, ScanResult>> {
+  async scanMultipleFiles(
+    filePaths: string[]
+  ): Promise<Map<string, ScanResult>> {
     const results = new Map<string, ScanResult>();
-
     for (const filePath of filePaths) {
       results.set(filePath, await this.scanFile(filePath));
     }
-
     return results;
   }
 

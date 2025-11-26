@@ -532,6 +532,13 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/clamscan@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.npmjs.org/@types/clamscan/-/clamscan-2.4.1.tgz"
+  integrity sha512-KhBHhXsMGDoEkk87VRtHtDsjoqXD3epu+a09c1sjW7xqpvoihScxhZNdNIPegVCLDvPOp4khiIpy02XabseztQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/connect@*":
   version "3.4.38"
   resolved "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz"
