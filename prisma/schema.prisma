@@ -101,7 +101,7 @@ model Document {
   @@index([agencyId, documentTypeId, userType, userId])
   @@index([agencyId, status])
   @@index([createdBy])
-  @@unique([userType, userId, documentTypeId])
+  // Removed: @@unique([userType, userId, documentTypeId]) - Allow multiple documents of same type per user
 }
 
 model DocumentVersion {

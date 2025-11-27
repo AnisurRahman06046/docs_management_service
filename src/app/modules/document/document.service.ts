@@ -4,6 +4,7 @@ import { FileManagerService } from '../upload/fileManager.service';
 import { documentTypeRepository } from '../document-type/documentType.repository';
 import { documentRepository } from './document.repository';
 import { CreateDocumentsRequest, DocumentResponse, UserType } from './document.interface';
+import { ChecklistSyncService } from './checklistSync.service';
 
 type ServiceResult<T> =
   | { success: true; data: T }
@@ -82,23 +83,6 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
       }
     }
 
-    // Check for duplicate documents
-    for (const doc of documents) {
-      const existingDoc = await documentRepository.findByUserAndType(userType, userId, doc.documentTypeId);
-      if (existingDoc) {
-        cleanupTempFiles(documents);
-        const docType = typeMap.get(doc.documentTypeId);
-        return {
-          success: false,
-          error: {
-            statusCode: 409,
-            message: 'Document already exists',
-            errorMessages: [{ path: doc.documentTypeId, message: `A ${docType?.name || 'document'} already exists for this user` }],
-          },
-        };
-      }
-    }
-
     // Create documents
     for (const doc of documents) {
       const permanentPath = FileManagerService.getRelativePermanentPath({
@@ -150,6 +134,11 @@ const createDocuments = async (payload: CreateDocumentsRequest): Promise<Service
         createdAt: createdDoc.createdAt,
       });
     }
+
+    // Sync checklist with external user service (fire and forget)
+    ChecklistSyncService.syncUserChecklist(agencyId, userId).catch(() => {
+      // Error already logged in the service
+    });
 
     return { success: true, data: createdDocs };
   } catch (error) {

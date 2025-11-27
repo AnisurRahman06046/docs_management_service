@@ -30,6 +30,9 @@ const config = {
     cronSchedule: process.env.TEMP_CLEANUP_CRON || '0 * * * *', // Every hour
     maxAgeHours: Number(process.env.TEMP_CLEANUP_MAX_AGE_HOURS) || 24,
   },
+  externalServices: {
+    userServiceBaseUrl: process.env.USER_SERVICE_BASE_URL || 'https://dev-visa.doer.com.bd/api/v1/user-service',
+  },
   virusScan: {
     enabled: process.env.VIRUS_SCAN_ENABLED !== 'false',
     clamdscan: {
